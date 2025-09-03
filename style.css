@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 :root {
-    --sent-bg: #DCF8C6; /* Warna bubble chat Anda */
-    --received-bg: #FFFFFF; /* Warna bubble chat orang lain */
+    --sent-bg: #DCF8C6;
+    --received-bg: #FFFFFF;
     --agree-color: #25D366;
     --disagree-color: #FF5A5F;
     --system-color: #E5A937;
@@ -15,7 +15,6 @@
 
 * { box-sizing: border-box; }
 
-/* PERUBAHAN 1: Menghapus overflow: hidden agar lebih fleksibel */
 html, body {
     height: 100%;
     margin: 0;
@@ -55,9 +54,11 @@ body {
     border-radius: 4px; cursor: pointer; font-weight: bold;
 }
 
+/* PERUBAHAN UTAMA: Menggunakan CSS Grid */
 .app-container {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    /* Definisikan baris: header, chart, area chat (mengisi sisa), footer */
+    grid-template-rows: auto auto 1fr auto; 
     height: 100%; 
     width: 100%;
     max-width: 600px;
@@ -72,7 +73,6 @@ body {
     text-align: center;
     box-shadow: var(--shadow);
     z-index: 10;
-    flex-shrink: 0;
 }
 .app-header h1 {
     margin: 0;
@@ -83,7 +83,6 @@ body {
     padding: 10px 20px;
     margin: 10px;
     border-radius: 8px;
-    flex-shrink: 0;
     transition: padding 0.3s ease;
 }
 .card-header {
@@ -97,14 +96,8 @@ body {
     font-size: 1.1rem;
 }
 .toggle-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: none; border: none; cursor: pointer; padding: 5px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
 }
 .toggle-btn:hover {
     background-color: #f0f0f0;
@@ -124,23 +117,20 @@ body {
     transform: rotate(180deg);
 }
 .is-collapsed.chart-container-small {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 10px; padding-bottom: 10px;
 }
 .is-collapsed .card-header {
     margin-bottom: 0;
 }
 
-/* PERUBAHAN 2: Membuat area chat lebih 'patuh' dan bisa di-scroll */
 .chat-screen {
-    flex-grow: 1;
-    overflow-y: auto; /* Memastikan scroll vertikal aktif */
+    overflow-y: auto;
     padding: 10px;
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
     display: flex;
     flex-direction: column;
-    min-height: 0; /* Trik agar flexbox-grow bekerja sempurna dengan scroll */
-    scroll-behavior: smooth; /* Bonus: scroll jadi lebih mulus */
+    min-height: 0;
+    scroll-behavior: smooth;
 }
 
 .chat-bubble {
@@ -204,7 +194,6 @@ body {
 .chat-footer {
     background: #F0F0F0;
     box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-    flex-shrink: 0;
 }
 .chat-input-bar {
     display: flex;
