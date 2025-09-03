@@ -9,55 +9,75 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // =================================================================
 // REFERENSI ELEMENT HTML
 // =================================================================
-const commentsContainer = document.getElementById('comments-container');
-const participantListEl = document.getElementById('participant-list');
-const paginationControlsEl = document.getElementById('pagination-controls');
+const nameRegistrationScreen = document.getElementById('name-registration-screen');
+const nameForm = document.getElementById('name-form');
+const nameInputReg = document.getElementById('name-input-reg');
+const mainApp = document.getElementById('main-app');
+const chatScreen = document.getElementById('chat-screen');
+const commentForm = document.getElementById('comment-form');
+const commentInput = document.getElementById('comment-input');
+const agreeBtn = document.getElementById('agree-btn');
+const disagreeBtn = document.getElementById('disagree-btn');
 const chartCanvas = document.getElementById('voteChart').getContext('2d');
 
-// Modal Elements
-const openModalBtn = document.getElementById('open-vote-modal');
-const modalOverlay = document.getElementById('vote-modal');
-const closeModalBtn = document.getElementById('close-modal');
-const voteForm = document.getElementById('voteForm');
-const nameInput = document.getElementById('name-input');
-const commentInput = document.getElementById('comment-input');
+// Elemen baru untuk reply
+const replyContextBar = document.getElementById('reply-context-bar');
+const replyToNameEl = document.getElementById('reply-to-name');
+const replyToTextEl = document.getElementById('reply-to-text');
+const cancelReplyBtn = document.getElementById('cancel-reply-btn');
+
 
 // =================================================================
 // STATE APLIKASI
 // =================================================================
+let currentUser = null;
 let voteChart;
-let allParticipants = [];
-let currentPage = 1;
-const itemsPerPage = 5;
+let replyContext = null; // State untuk menyimpan data pesan yang akan dibalas
 
 // =================================================================
 // FUNGSI UTAMA
 // =================================================================
 
-// Inisialisasi Chart
+function disableVotingButtons() {
+    agreeBtn.disabled = true;
+    disagreeBtn.disabled = true;
+    agreeBtn.style.cursor = 'not-allowed';
+    disagreeBtn.style.cursor = 'not-allowed';
+    agreeBtn.style.opacity = '0.5';
+    disagreeBtn.style.opacity = '0.5';
+}
+
+function checkUser() {
+    const storedName = localStorage.getItem('votingAppName');
+    if (storedName) {
+        currentUser = storedName;
+        nameRegistrationScreen.style.display = 'none';
+        mainApp.style.display = 'flex';
+        
+        const hasVoted = localStorage.getItem('userHasVoted');
+        if (hasVoted) {
+            disableVotingButtons();
+        }
+
+        fetchInitialData();
+        subscribeToChanges();
+    } else {
+        nameRegistrationScreen.style.display = 'flex';
+        mainApp.style.display = 'none';
+    }
+}
+
 function initializeChart() {
     voteChart = new Chart(chartCanvas, {
         type: 'pie',
         data: {
             labels: ['Setuju', 'Tidak Setuju'],
-            datasets: [{
-                data: [0, 0],
-                backgroundColor: ['#27ae60', '#c0392b'],
-                borderColor: '#ffffff',
-                borderWidth: 3
-            }]
+            datasets: [{ data: [0, 0], backgroundColor: ['#25D366', '#FF5A5F'], borderWidth: 0 }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 }
 
-// Update data di Chart
 function updateChart(agreeCount, disagreeCount) {
     if (voteChart) {
         voteChart.data.datasets[0].data[0] = agreeCount;
@@ -66,155 +86,159 @@ function updateChart(agreeCount, disagreeCount) {
     }
 }
 
-// Menampilkan komentar dengan gaya chat
-function displayComment(data) {
-    if (!data.comment_text) return; // Jangan tampilkan jika tidak ada komentar
-    
+function scrollToBottom() {
+    chatScreen.scrollTop = chatScreen.scrollHeight;
+}
+
+// DIUBAH: Fungsi displayMessage sekarang bisa menampilkan block balasan
+function displayMessage(data) {
     const bubble = document.createElement('div');
-    bubble.classList.add('comment-bubble', data.vote_option);
+    bubble.classList.add('chat-bubble');
+    bubble.dataset.id = data.id; // Simpan ID pesan
+    bubble.dataset.name = data.name; // Simpan nama pengirim
+    bubble.dataset.text = data.comment_text; // Simpan teks pesan
+
+    let replyHTML = '';
+    if (data.reply_to_id) {
+        replyHTML = `
+            <div class="reply-block">
+                <div class="name">${data.reply_to_name}</div>
+                <div class="text">${data.reply_to_text}</div>
+            </div>
+        `;
+    }
+
+    if (data.vote_option === 'komentar') {
+        bubble.classList.add('komentar');
+        bubble.innerHTML = `
+            ${replyHTML}
+            <div class="name">${data.name}</div>
+            <div class="text">${data.comment_text}</div>
+        `;
+    } else {
+        bubble.classList.add('system');
+        bubble.innerHTML = `<strong>${data.name}</strong> ${data.comment_text}`;
+    }
     
-    bubble.innerHTML = `
-        <div class="name" style="color: ${data.vote_option === 'setuju' ? '#27ae60' : '#c0392b'};">${data.name}</div>
-        <div class="text">${data.comment_text}</div>
-    `;
-    
-    commentsContainer.prepend(bubble); // Prepend agar muncul di atas (tapi karena flex-reverse, jadi di bawah)
+    chatScreen.appendChild(bubble);
 }
 
-// Render list partisipan untuk halaman tertentu
-function renderParticipants() {
-    participantListEl.innerHTML = '';
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedItems = allParticipants.slice(startIndex, endIndex);
-
-    paginatedItems.forEach(name => {
-        const item = document.createElement('div');
-        item.className = 'participant-item';
-        item.textContent = name;
-        participantListEl.appendChild(item);
-    });
-    renderPaginationControls();
-}
-
-// Render tombol pagination
-function renderPaginationControls() {
-    paginationControlsEl.innerHTML = '';
-    const totalPages = Math.ceil(allParticipants.length / itemsPerPage);
-    if (totalPages <= 1) return;
-
-    paginationControlsEl.innerHTML = `
-        <button id="prev-page" ${currentPage === 1 ? 'disabled' : ''}>&lt;</button>
-        <span>Halaman ${currentPage} dari ${totalPages}</span>
-        <button id="next-page" ${currentPage === totalPages ? 'disabled' : ''}>&gt;</button>
-    `;
-
-    document.getElementById('prev-page')?.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderParticipants();
-        }
-    });
-    
-    document.getElementById('next-page')?.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderParticipants();
-        }
-    });
-}
-
-// Ambil semua data awal saat halaman dimuat
 async function fetchInitialData() {
-    // Ambil data votes untuk chart
-    const { data: votes, error: votesError } = await supabaseClient.from('votes').select('option, count');
+    const { data: votes } = await supabaseClient.from('votes').select('option, count');
     if (votes) {
         const agree = votes.find(v => v.option === 'setuju')?.count || 0;
         const disagree = votes.find(v => v.option === 'tidak-setuju')?.count || 0;
         updateChart(agree, disagree);
     }
 
-    // Ambil data comments untuk partisipan dan live chat
-    const { data: comments, error: commentsError } = await supabaseClient.from('comments').select('*').order('created_at', { ascending: true });
+    const { data: comments } = await supabaseClient.from('comments').select('*').order('created_at', { ascending: true });
     if (comments) {
-        allParticipants = comments.map(c => c.name);
-        renderParticipants();
-        
-        commentsContainer.innerHTML = '';
-        comments.forEach(displayComment);
+        chatScreen.innerHTML = '';
+        comments.forEach(displayMessage);
+        scrollToBottom();
     }
+}
+
+async function handleVote(voteChoice, message) {
+    if (localStorage.getItem('userHasVoted')) {
+        alert('Anda sudah memberikan suara.');
+        return;
+    }
+    disableVotingButtons();
+    localStorage.setItem('userHasVoted', 'true');
+    await supabaseClient.from('comments').insert([{ name: currentUser, comment_text: message, vote_option: voteChoice }]);
+    await supabaseClient.rpc('increment_vote', { vote_option: voteChoice });
+}
+
+// =================================================================
+// FUNGSI BARU UNTUK REPLY
+// =================================================================
+function showReplyUI(context) {
+    replyContextBar.style.display = 'flex';
+    replyToNameEl.textContent = context.name;
+    replyToTextEl.textContent = context.text;
+    commentInput.focus();
+}
+
+function cancelReply() {
+    replyContext = null;
+    replyContextBar.style.display = 'none';
 }
 
 // =================================================================
 // EVENT LISTENERS
 // =================================================================
 
-// Modal Listeners
-openModalBtn.addEventListener('click', () => modalOverlay.classList.add('show'));
-closeModalBtn.addEventListener('click', () => modalOverlay.classList.remove('show'));
-modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) {
-        modalOverlay.classList.remove('show');
-    }
-});
-
-// Form Submission
-voteForm.addEventListener('submit', async (e) => {
+nameForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const voteChoice = e.submitter.dataset.vote;
-    const name = nameInput.value.trim();
-    const comment = commentInput.value.trim();
-
-    if (!name || !voteChoice) {
-        alert('Nama harus diisi!');
-        return;
+    const name = nameInputReg.value.trim();
+    if (name) {
+        localStorage.setItem('votingAppName', name);
+        checkUser();
     }
-
-    // Kirim komentar dan nama ke tabel 'comments'
-    const { error: commentError } = await supabaseClient
-        .from('comments')
-        .insert([{ name: name, comment_text: comment, vote_option: voteChoice }]);
-
-    if (commentError) {
-        console.error("Error submitting comment:", commentError);
-        return;
-    }
-    
-    // Panggil RPC untuk menambah vote
-    const { error: voteError } = await supabaseClient.rpc('increment_vote', { vote_option: voteChoice });
-    if (voteError) console.error("Error incrementing vote:", voteError);
-
-    // Reset form dan tutup modal
-    voteForm.reset();
-    modalOverlay.classList.remove('show');
 });
 
+// DIUBAH: Form submit sekarang mengirim data reply jika ada
+commentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const comment = commentInput.value.trim();
+    if (comment) {
+        const messageData = {
+            name: currentUser,
+            comment_text: comment,
+            vote_option: 'komentar'
+        };
+
+        if (replyContext) {
+            messageData.reply_to_id = replyContext.id;
+            messageData.reply_to_name = replyContext.name;
+            messageData.reply_to_text = replyContext.text;
+        }
+
+        await supabaseClient.from('comments').insert([messageData]);
+        
+        commentInput.value = '';
+        cancelReply(); // Reset reply context setelah mengirim
+    }
+});
+
+agreeBtn.addEventListener('click', () => handleVote('setuju', 'memilih Setuju 👍'));
+disagreeBtn.addEventListener('click', () => handleVote('tidak-setuju', 'memilih Tidak Setuju 👎'));
+cancelReplyBtn.addEventListener('click', cancelReply);
+
+// BARU: Event listener untuk memilih pesan yang akan dibalas
+chatScreen.addEventListener('click', (e) => {
+    const bubble = e.target.closest('.chat-bubble.komentar');
+    if (bubble) {
+        replyContext = {
+            id: bubble.dataset.id,
+            name: bubble.dataset.name,
+            text: bubble.dataset.text,
+        };
+        showReplyUI(replyContext);
+    }
+});
 
 // =================================================================
 // REAL-TIME SUBSCRIPTIONS
 // =================================================================
 function subscribeToChanges() {
-    const channel = supabaseClient.channel('public-db-changes');
-    channel
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'comments' }, (payload) => {
-            const newComment = payload.new;
-            // Tambahkan ke live chat
-            displayComment(newComment);
-            // Tambahkan ke daftar partisipan dan render ulang
-            allParticipants.push(newComment.name);
-            renderParticipants();
-        })
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'votes' }, (payload) => {
-            const { option, count } = payload.new;
-            const currentAgree = option === 'setuju' ? count : voteChart.data.datasets[0].data[0];
-            const currentDisagree = option === 'tidak-setuju' ? count : voteChart.data.datasets[0].data[1];
-            updateChart(currentAgree, currentDisagree);
-        })
-        .subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-                console.log('✅ Realtime status: SUBSCRIBED');
+    supabaseClient
+        .channel('public-db-changes')
+        .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
+            console.log('Perubahan terdeteksi:', payload);
+            if (payload.table === "comments" && payload.eventType === 'INSERT') {
+                displayMessage(payload.new);
+                scrollToBottom();
             }
-        });
+            if (payload.table === "votes" && payload.eventType === 'UPDATE') {
+                const { option, count } = payload.new;
+                const currentAgree = option === 'setuju' ? count : voteChart.data.datasets[0].data[0];
+                const currentDisagree = option === 'tidak-setuju' ? count : voteChart.data.datasets[0].data[1];
+                updateChart(currentAgree, currentDisagree);
+            }
+        })
+        .subscribe();
 }
 
 // =================================================================
@@ -222,6 +246,5 @@ function subscribeToChanges() {
 // =================================================================
 document.addEventListener('DOMContentLoaded', () => {
     initializeChart();
-    fetchInitialData();
-    subscribeToChanges();
+    checkUser();
 });

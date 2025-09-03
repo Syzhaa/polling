@@ -3,73 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Voting Wisuda</title>
+    <title>Voting Wisuda</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>📊 Dashboard Pembayaran Wisuda</h1>
-            <p>Hasil voting dan komentar partisipan secara real-time.</p>
-        </header>
-
-        <main class="dashboard">
-            <div class="dashboard-left">
-                <div class="card chart-container">
-                    <h2>Hasil Voting</h2>
-                    <canvas id="voteChart"></canvas>
-                </div>
-                
-                <div class="card participant-container">
-                    <h2>Partisipan Terdaftar</h2>
-                    <div id="participant-list" class="participant-list">
-                        </div>
-                    <div id="pagination-controls" class="pagination">
-                        </div>
-                </div>
-            </div>
-
-            <div class="dashboard-right">
-                <div class="card live-comments-container">
-                    <h2><span class="material-symbols-outlined">chat</span> Live Comments</h2>
-                    <div id="comments-container" class="comments-container">
-                        </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <div class="fab-container">
-        <button id="open-vote-modal" class="fab">
-            <span class="material-symbols-outlined">how_to_vote</span> Beri Suara
-        </button>
-    </div>
-
-    <div id="vote-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button id="close-modal" class="close-button">&times;</button>
-            <h2>Berikan Suara Anda</h2>
-            <form id="voteForm">
-                <div class="input-group">
-                    <label for="name-input">Nama Lengkap</label>
-                    <input type="text" id="name-input" placeholder="Masukkan nama Anda" required>
-                </div>
-                <div class="input-group">
-                    <label for="comment-input">Komentar (Opsional)</label>
-                    <input type="text" id="comment-input" placeholder="Tulis komentar singkat...">
-                </div>
-                <div class="vote-buttons">
-                    <button type="submit" class="btn btn-agree" data-vote="setuju">
-                        <span class="material-symbols-outlined">thumb_up</span> Setuju
-                    </button>
-                    <button type="submit" class="btn btn-disagree" data-vote="tidak-setuju">
-                        <span class="material-symbols-outlined">thumb_down</span> Tidak Setuju
-                    </button>
-                </div>
+    <div id="name-registration-screen" class="registration-container">
+        <div class="card">
+            <h2>Selamat Datang</h2>
+            <p>Silakan masukkan nama Anda untuk berpartisipasi dalam voting.</p>
+            <form id="name-form">
+                <input type="text" id="name-input-reg" placeholder="Nama Lengkap Anda" required>
+                <button type="submit">Masuk</button>
             </form>
         </div>
+    </div>
+
+    <div id="main-app" class="app-container" style="display: none;">
+        <header class="app-header">
+            <h1>Voting Wisuda</h1>
+        </header>
+
+        <div class="chart-container-small card">
+            <canvas id="voteChart"></canvas>
+        </div>
+
+        <main id="chat-screen" class="chat-screen">
+            </main>
+
+        <footer class="chat-footer">
+            <div id="reply-context-bar" class="reply-context" style="display: none;">
+                <div class="reply-content">
+                    <div id="reply-to-name" class="reply-name"></div>
+                    <div id="reply-to-text" class="reply-text"></div>
+                </div>
+                <button id="cancel-reply-btn" class="cancel-reply">&times;</button>
+            </div>
+            
+            <div class="chat-input-bar">
+                <div class="vote-buttons">
+                    <button id="agree-btn" class="vote-btn agree">👍</button>
+                    <button id="disagree-btn" class="vote-btn disagree">👎</button>
+                </div>
+                <form id="comment-form" class="comment-form">
+                    <input type="text" id="comment-input" placeholder="Ketik komentar..." autocomplete="off">
+                    <button type="submit" class="send-btn">
+                        <span class="material-symbols-outlined">send</span>
+                    </button>
+                </form>
+            </div>
+        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
