@@ -13,19 +13,48 @@
     --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-* { box-sizing: border-box; }
+* { 
+    box-sizing: border-box; 
+}
 
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+    overflow: hidden; /* Mencegah seluruh halaman bisa di-scroll */
+    font-family: 'Roboto', sans-serif;
 }
 
-body {
-    font-family: 'Roboto', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+/* ======================================================= */
+/* Kunci Utama Layout: Menggunakan Flexbox secara Tegas    */
+/* ======================================================= */
+.app-container {
+    display: flex;
+    flex-direction: column; /* MEMAKSA SEMUA ELEMEN TERSUSUN KE BAWAH */
+    height: 100%; 
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--app-bg);
 }
+
+.app-header, 
+.chart-container-small, 
+.chat-footer {
+    flex-shrink: 0; /* Bagian atas dan bawah tidak boleh menyusut */
+}
+
+.chat-screen {
+    flex-grow: 1; /* Area chat MENGISI SEMUA SISA RUANG */
+    min-height: 0; /* Trik penting agar scroll berfungsi di flexbox */
+    overflow-y: auto; /* HANYA area ini yang bisa di-scroll */
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+    scroll-behavior: smooth;
+}
+/* ======================================================= */
 
 .card {
     background: var(--card-bg);
@@ -52,16 +81,6 @@ body {
 .registration-container button {
     padding: 10px; background: var(--agree-color); color: white; border: none;
     border-radius: 4px; cursor: pointer; font-weight: bold;
-}
-
-.app-container {
-    display: grid;
-    grid-template-rows: auto auto 1fr auto; 
-    height: 100%; 
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    background: var(--app-bg);
 }
 
 .app-header {
@@ -119,16 +138,6 @@ body {
 }
 .is-collapsed .card-header {
     margin-bottom: 0;
-}
-
-.chat-screen {
-    overflow-y: auto;
-    padding: 10px;
-    background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    scroll-behavior: smooth;
 }
 
 .chat-bubble {
@@ -252,17 +261,9 @@ body {
     color: var(--light-text); cursor: pointer; padding: 0 5px;
 }
 
-@media (orientation: landscape) and (max-height: 500px) {
+/* Aturan landscape yang disederhanakan */
+@media (orientation: landscape) {
     .chart-container-small {
         display: none;
-    }
-    .app-header {
-        padding: 10px 15px;
-    }
-    .app-header h1 {
-        font-size: 1.1rem;
-    }
-    .chat-input-bar {
-        padding: 5px 8px;
     }
 }
