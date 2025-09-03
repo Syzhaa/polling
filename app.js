@@ -19,20 +19,17 @@ const commentInput = document.getElementById('comment-input');
 const agreeBtn = document.getElementById('agree-btn');
 const disagreeBtn = document.getElementById('disagree-btn');
 const chartCanvas = document.getElementById('voteChart').getContext('2d');
-
-// Elemen baru untuk reply
 const replyContextBar = document.getElementById('reply-context-bar');
 const replyToNameEl = document.getElementById('reply-to-name');
 const replyToTextEl = document.getElementById('reply-to-text');
 const cancelReplyBtn = document.getElementById('cancel-reply-btn');
-
 
 // =================================================================
 // STATE APLIKASI
 // =================================================================
 let currentUser = null;
 let voteChart;
-let replyContext = null; // State untuk menyimpan data pesan yang akan dibalas
+let replyContext = null;
 
 // =================================================================
 // FUNGSI UTAMA
@@ -90,13 +87,13 @@ function scrollToBottom() {
     chatScreen.scrollTop = chatScreen.scrollHeight;
 }
 
-// DIUBAH: Fungsi displayMessage sekarang bisa menampilkan block balasan
+// **INI PERUBAHAN UTAMA**: Logika untuk menampilkan bubble chat
 function displayMessage(data) {
     const bubble = document.createElement('div');
     bubble.classList.add('chat-bubble');
-    bubble.dataset.id = data.id; // Simpan ID pesan
-    bubble.dataset.name = data.name; // Simpan nama pengirim
-    bubble.dataset.text = data.comment_text; // Simpan teks pesan
+    bubble.dataset.id = data.id;
+    bubble.dataset.name = data.name;
+    bubble.dataset.text = data.comment_text;
 
     let replyHTML = '';
     if (data.reply_to_id) {
@@ -109,13 +106,23 @@ function displayMessage(data) {
     }
 
     if (data.vote_option === 'komentar') {
-        bubble.classList.add('komentar');
-        bubble.innerHTML = `
-            ${replyHTML}
-            <div class="name">${data.name}</div>
-            <div class="text">${data.comment_text}</div>
-        `;
+        // Cek apakah pesan ini dari pengguna saat ini atau orang lain
+        if (data.name === currentUser) {
+            bubble.classList.add('sent'); // Pesan Anda
+            bubble.innerHTML = `
+                ${replyHTML}
+                <div class="text">${data.comment_text}</div>
+            `;
+        } else {
+            bubble.classList.add('received'); // Pesan orang lain
+            bubble.innerHTML = `
+                ${replyHTML}
+                <div class="name">${data.name}</div>
+                <div class="text">${data.comment_text}</div>
+            `;
+        }
     } else {
+        // Ini untuk notifikasi voting sistem
         bubble.classList.add('system');
         bubble.innerHTML = `<strong>${data.name}</strong> ${data.comment_text}`;
     }
@@ -150,9 +157,6 @@ async function handleVote(voteChoice, message) {
     await supabaseClient.rpc('increment_vote', { vote_option: voteChoice });
 }
 
-// =================================================================
-// FUNGSI BARU UNTUK REPLY
-// =================================================================
 function showReplyUI(context) {
     replyContextBar.style.display = 'flex';
     replyToNameEl.textContent = context.name;
@@ -178,7 +182,6 @@ nameForm.addEventListener('submit', (e) => {
     }
 });
 
-// DIUBAH: Form submit sekarang mengirim data reply jika ada
 commentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const comment = commentInput.value.trim();
@@ -196,9 +199,8 @@ commentForm.addEventListener('submit', async (e) => {
         }
 
         await supabaseClient.from('comments').insert([messageData]);
-        
         commentInput.value = '';
-        cancelReply(); // Reset reply context setelah mengirim
+        cancelReply();
     }
 });
 
@@ -206,9 +208,8 @@ agreeBtn.addEventListener('click', () => handleVote('setuju', 'memilih Setuju ðŸ
 disagreeBtn.addEventListener('click', () => handleVote('tidak-setuju', 'memilih Tidak Setuju ðŸ‘Ž'));
 cancelReplyBtn.addEventListener('click', cancelReply);
 
-// BARU: Event listener untuk memilih pesan yang akan dibalas
 chatScreen.addEventListener('click', (e) => {
-    const bubble = e.target.closest('.chat-bubble.komentar');
+    const bubble = e.target.closest('.chat-bubble:not(.system)'); // System message can't be replied to
     if (bubble) {
         replyContext = {
             id: bubble.dataset.id,
@@ -226,7 +227,6 @@ function subscribeToChanges() {
     supabaseClient
         .channel('public-db-changes')
         .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
-            console.log('Perubahan terdeteksi:', payload);
             if (payload.table === "comments" && payload.eventType === 'INSERT') {
                 displayMessage(payload.new);
                 scrollToBottom();
