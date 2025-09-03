@@ -1,12 +1,13 @@
 // =================================================================
 // LANGKAH 1: KONFIGURASI SUPABASE
-// Ganti dengan URL dan ANON KEY dari proyek Supabase Anda
+// URL dan Kunci API Anda sudah dimasukkan di sini.
 // =================================================================
 const SUPABASE_URL = 'https://lofsbwhexxzpxqupfxiu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvZnNid2hleHh6cHhxdXBmeGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4OTQ0NTksImV4cCI6MjA3MjQ3MDQ1OX0.FoF14c8ZYMs-7BbQpTcbJhPzRPAhdBXK_ksMUBWZEP0A';
 
 // Inisialisasi Klien Supabase
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Kita menggunakan objek 'supabase' global dari script CDN untuk membuat client baru
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
 // =================================================================
@@ -27,9 +28,14 @@ const commentsContainer = document.getElementById('comments-container');
 // =================================================================
 async function fetchInitialData() {
     // Ambil data voting awal
-    const { data: votes, error: votesError } = await supabase
+    const { data: votes, error: votesError } = await supabaseClient
         .from('votes')
         .select('option, count');
+    
+    if (votesError) {
+        console.error('Error fetching votes:', votesError);
+        return;
+    }
     
     if (votes) {
         votes.forEach(vote => {
@@ -42,10 +48,15 @@ async function fetchInitialData() {
     }
 
     // Ambil data komentar yang sudah ada
-    const { data: comments, error: commentsError } = await supabase
+    const { data: comments, error: commentsError } = await supabaseClient
         .from('comments')
         .select('*')
         .order('created_at', { ascending: false }); // Urutkan dari terbaru
+
+    if (commentsError) {
+        console.error('Error fetching comments:', commentsError);
+        return;
+    }
 
     if (comments) {
         commentsContainer.innerHTML = ''; // Kosongkan dulu
@@ -60,12 +71,14 @@ async function fetchInitialData() {
 // Event listener untuk tombol Setuju
 agreeBtn.addEventListener('click', async () => {
     // Memanggil fungsi 'increment_vote' yang kita buat di SQL Editor
-    await supabase.rpc('increment_vote', { vote_option: 'setuju' });
+    const { error } = await supabaseClient.rpc('increment_vote', { vote_option: 'setuju' });
+    if (error) console.error('Error incrementing agree vote:', error);
 });
 
 // Event listener untuk tombol Tidak Setuju
 disagreeBtn.addEventListener('click', async () => {
-    await supabase.rpc('increment_vote', { vote_option: 'tidak-setuju' });
+    const { error } = await supabaseClient.rpc('increment_vote', { vote_option: 'tidak-setuju' });
+    if (error) console.error('Error incrementing disagree vote:', error);
 });
 
 // Event listener untuk form komentar
@@ -77,12 +90,16 @@ commentForm.addEventListener('submit', async (e) => {
 
     if (name && comment) {
         // Kirim data baru ke tabel 'comments'
-        await supabase
+        const { error } = await supabaseClient
             .from('comments')
             .insert([{ name: name, comment_text: comment, vote_option: voteChoice }]);
         
-        nameInput.value = '';
-        commentInput.value = '';
+        if (error) {
+            console.error('Error submitting comment:', error);
+        } else {
+            nameInput.value = '';
+            commentInput.value = '';
+        }
     }
 });
 
@@ -107,30 +124,37 @@ function displayComment(data) {
 // Fungsi untuk mendengarkan semua perubahan data
 function subscribeToChanges() {
     // Mendengarkan jika ada komentar BARU (INSERT) di tabel 'comments'
-    supabase
+    supabaseClient
         .from('comments')
         .on('INSERT', payload => {
+            console.log('New comment received!', payload);
             displayComment(payload.new);
         })
         .subscribe();
     
     // Mendengarkan jika ada PEMBARUAN (UPDATE) di tabel 'votes'
-    supabase
-        .from('votes')
+    supabaseClient
+        .from('votes:option=eq.setuju') // Hanya dengarkan perubahan untuk 'setuju'
         .on('UPDATE', payload => {
-            const { option, count } = payload.new;
-            if (option === 'setuju') {
-                agreeCountEl.textContent = count;
-            } else if (option === 'tidak-setuju') {
-                disagreeCountEl.textContent = count;
-            }
+            console.log('Agree vote updated!', payload);
+            agreeCountEl.textContent = payload.new.count;
+        })
+        .subscribe();
+        
+    supabaseClient
+        .from('votes:option=eq.tidak-setuju') // Hanya dengarkan perubahan untuk 'tidak-setuju'
+        .on('UPDATE', payload => {
+            console.log('Disagree vote updated!', payload);
+            disagreeCountEl.textContent = payload.new.count;
         })
         .subscribe();
 }
 
 
 // =================================================================
-// LANGKAH 6: JALANKAN SEMUA FUNGSI
+// LANGKAH 6: JALANKAN SEMUA FUNGSI SAAT HALAMAN SIAP
 // =================================================================
-fetchInitialData();
-subscribeToChanges();
+document.addEventListener('DOMContentLoaded', () => {
+    fetchInitialData();
+    subscribeToChanges();
+});
