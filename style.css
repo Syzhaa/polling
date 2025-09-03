@@ -15,11 +15,11 @@
 
 * { box-sizing: border-box; }
 
+/* PERUBAHAN 1: Menghapus overflow: hidden agar lebih fleksibel */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
 }
 
 body {
@@ -79,7 +79,6 @@ body {
     font-size: 1.2rem;
 }
 
-/* PERUBAHAN 1: Style untuk Kartu Diagram & Tombol Toggle */
 .chart-container-small {
     padding: 10px 20px;
     margin: 10px;
@@ -118,7 +117,6 @@ body {
     overflow: hidden;
     transition: height 0.3s ease;
 }
-/* Style saat diciutkan */
 .is-collapsed .chart-wrapper {
     height: 0;
 }
@@ -133,14 +131,16 @@ body {
     margin-bottom: 0;
 }
 
-
+/* PERUBAHAN 2: Membuat area chat lebih 'patuh' dan bisa di-scroll */
 .chat-screen {
     flex-grow: 1;
-    overflow-y: auto;
+    overflow-y: auto; /* Memastikan scroll vertikal aktif */
     padding: 10px;
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
     display: flex;
     flex-direction: column;
+    min-height: 0; /* Trik agar flexbox-grow bekerja sempurna dengan scroll */
+    scroll-behavior: smooth; /* Bonus: scroll jadi lebih mulus */
 }
 
 .chat-bubble {
@@ -233,15 +233,13 @@ body {
     border-radius: 20px;
     padding: 0 5px;
 }
-
-/* PERUBAHAN 2: Memperbaiki masalah form komentar melebar */
 .comment-form input {
     flex-grow: 1;
     border: none;
     padding: 10px;
     background: transparent;
     outline: none;
-    min-width: 0; /* <-- INI KUNCINYA! */
+    min-width: 0;
 }
 .comment-form .send-btn {
     background: none; border: none; color: #075E54;
