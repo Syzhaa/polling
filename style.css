@@ -1,169 +1,272 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
+:root {
+    --primary-color: #3498db;
+    --agree-color: #27ae60;
+    --disagree-color: #c0392b;
+    --bg-color: #f4f7f9;
+    --card-bg: #ffffff;
+    --text-color: #34495e;
+    --light-text: #7f8c8d;
+    --border-color: #e_a_e_c_f_1;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f4f7f6;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
 }
 
 .container {
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    max-width: 700px;
-    width: 100%;
-    text-align: center;
-}
-
-h1 {
-    color: #2c3e50;
-    margin-bottom: 10px;
-}
-
-p {
-    color: #7f8c8d;
-    margin-bottom: 30px;
-}
-
-hr {
-    border: none;
-    height: 1px;
-    background-color: #ecf0f1;
-    margin: 40px 0;
-}
-
-.vote-summary {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 30px;
-}
-
-.count {
     padding: 20px;
-    width: 45%;
-    border-radius: 8px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.count h2 {
-    margin: 0 0 10px 0;
-    font-size: 1em;
-    font-weight: 600;
+header {
+    text-align: center;
+    margin-bottom: 30px;
 }
 
-.count span {
-    font-size: 3em;
-    font-weight: 700;
+header h1 {
+    margin: 0;
+    font-size: 1.8rem;
 }
 
-.agree {
-    background-color: #e8f5e9; /* Light Green */
-    color: #2e7d32;
+header p {
+    color: var(--light-text);
 }
 
-.disagree {
-    background-color: #ffebee; /* Light Red */
-    color: #c62828;
-}
-
-.vote-actions {
-    display: flex;
-    justify-content: center;
+.dashboard {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 20px;
 }
 
-.btn {
-    border: none;
-    padding: 15px 30px;
-    border-radius: 8px;
-    font-size: 1em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    color: white;
+.card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+.card h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.btn-agree {
-    background-color: #4CAF50; /* Green */
+.card h2 .material-symbols-outlined {
+    font-size: 1.5rem;
 }
 
-.btn-disagree {
-    background-color: #f44336; /* Red */
-}
-
-.comment-form {
-    margin-top: 20px;
-}
-
-#commentForm {
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 300px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    justify-content: center;
 }
 
-#commentForm input[type="text"] {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1em;
+/* Participant List */
+.participant-list {
+    min-height: 150px;
+}
+.participant-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+}
+.participant-item:last-child {
+    border-bottom: none;
 }
 
-#commentForm button {
-    background-color: #3498db; /* Blue */
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: 500;
-}
-
-.vote-choice {
+.pagination {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    font-size: 0.9em;
+    align-items: center;
+    margin-top: 15px;
+    gap: 10px;
 }
 
-.comment-list {
-    margin-top: 30px;
-    text-align: left;
+.pagination button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: opacity 0.2s;
 }
 
-.comment-item {
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
+.pagination button:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* Live Comments (WA Style) */
+.live-comments-container {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+.comments-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column-reverse; /* Newest on bottom */
+}
+
+.comment-bubble {
+    padding: 8px 12px;
+    border-radius: 15px;
     margin-bottom: 10px;
-    border-left: 5px solid;
+    max-width: 80%;
+    word-wrap: break-word;
 }
 
-.comment-item.setuju {
-    border-left-color: #4CAF50; /* Green */
+.comment-bubble.setuju {
+    background-color: #dcf8c6;
+    border-bottom-left-radius: 3px;
+    align-self: flex-start;
 }
 
-.comment-item.tidak-setuju {
-    border-left-color: #f44336; /* Red */
+.comment-bubble.tidak-setuju {
+    background-color: #f1f0f0;
+    border-bottom-right-radius: 3px;
+    align-self: flex-end;
 }
-
-.comment-meta {
+.comment-bubble .name {
     font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 5px;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+.comment-bubble .text {
+    font-size: 0.9rem;
 }
 
-.comment-text {
-    color: #555;
+/* Floating Action Button (FAB) */
+.fab-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+.fab {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 28px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.fab:hover {
+    transform: scale(1.05);
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 1000;
+}
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    transform: translateY(-50px);
+    transition: transform 0.3s;
+}
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+}
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--light-text);
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.vote-buttons {
+    display: flex;
+    gap: 10px;
+}
+.btn {
+    flex-grow: 1;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.btn-agree { background-color: var(--agree-color); }
+.btn-disagree { background-color: var(--disagree-color); }
+
+/* Desktop view */
+@media (min-width: 768px) {
+    .dashboard {
+        grid-template-columns: 1fr 1fr;
+    }
+    .live-comments-container {
+        height: 100%;
+        max-height: 600px; /* Batas tinggi maksimal */
+    }
 }
