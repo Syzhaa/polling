@@ -9,7 +9,7 @@
 </head>
 <body>
 
-  <!-- Screen registrasi nama -->
+  <!-- Registrasi Nama -->
   <div id="name-registration-screen" class="registration-container">
     <div class="card">
       <h2>Selamat Datang</h2>
@@ -21,7 +21,7 @@
     </div>
   </div>
 
-  <!-- App utama -->
+  <!-- Aplikasi Utama -->
   <div id="main-app" class="app-container" style="display:none;">
     <header class="app-header">
       <h1>Voting Wisuda</h1>
@@ -47,19 +47,18 @@
           <div id="reply-to-name" class="reply-name"></div>
           <div id="reply-to-text" class="reply-text"></div>
         </div>
-        <button id="cancel-reply-btn" class="cancel-reply" aria-label="Batal balas">&times;</button>
+        <button id="cancel-reply-btn" class="cancel-reply">&times;</button>
       </div>
 
       <div class="chat-input-bar">
         <div class="vote-buttons">
-          <button id="agree-btn" class="vote-btn agree" aria-label="Setuju">👍</button>
-          <button id="disagree-btn" class="vote-btn disagree" aria-label="Tidak setuju">👎</button>
+          <button id="agree-btn" class="vote-btn agree">👍</button>
+          <button id="disagree-btn" class="vote-btn disagree">👎</button>
         </div>
 
         <form id="comment-form" class="comment-form">
-          <!-- DIGANTI: input -> textarea -->
           <textarea id="comment-input" placeholder="Ketik komentar..." rows="1" autocomplete="off" enterkeyhint="newline"></textarea>
-          <button type="submit" class="send-btn" aria-label="Kirim">
+          <button type="submit" class="send-btn">
             <span class="material-symbols-outlined">send</span>
           </button>
         </form>

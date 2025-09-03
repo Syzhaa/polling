@@ -49,7 +49,12 @@ function initializeChart() {
       labels: ['Setuju', 'Tidak Setuju'],
       datasets: [{ data: [0, 0], backgroundColor: ['#25D366', '#FF5A5F'], borderWidth: 0 }]
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom' } }, cutout: '60%' }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' } },
+      cutout: '60%'
+    }
   });
 }
 
@@ -178,12 +183,12 @@ commentInput.addEventListener('input', () => {
 });
 
 commentInput.addEventListener('keydown', (e) => {
-  // Enter → baris baru; kirim pakai tombol
   if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
-    e.stopPropagation(); // cegah bubbling yg bisa memicu submit
+    // Enter biasa → baris baru, jangan submit
+    e.stopPropagation();
   }
-  // Ctrl/Cmd + Enter → kirim
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    // Ctrl/Cmd+Enter → kirim
     e.preventDefault();
     commentForm.requestSubmit();
   }
@@ -201,7 +206,7 @@ commentForm.addEventListener('submit', async (e) => {
     }
     await supabaseClient.from('comments').insert([messageData]);
     commentInput.value = '';
-    commentInput.style.height = '32px'; // reset tinggi kecil lagi
+    commentInput.style.height = '32px'; // reset kecil lagi
     cancelReply();
   }
 });
@@ -218,9 +223,19 @@ chatScreen.addEventListener('click', (e) => {
   }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  initializeChart();
-  checkUser();
+// Toggle chart collapse
+toggleChartBtn.addEventListener('click', () => {
+  chartCard.classList.toggle('is-collapsed');
+  const icon = toggleChartBtn.querySelector('.material-symbols-outlined');
+  const collapsed = chartCard.classList.contains('is-collapsed');
+  icon.textContent = collapsed ? 'expand_more' : 'expand_less';
+  toggleChartBtn.setAttribute('aria-expanded', String(!collapsed));
+
+  if (collapsed) {
+    voteChart && voteChart.resize(0, 0); // paksa nol
+  } else {
+    setTimeout(() => { voteChart && voteChart.resize(); }, 10);
+  }
 });
 
 // =================================================================
@@ -243,3 +258,11 @@ function subscribeToChanges() {
     })
     .subscribe();
 }
+
+// =================================================================
+// INISIALISASI
+// =================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initializeChart();
+  checkUser();
+});
