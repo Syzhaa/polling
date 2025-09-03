@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Pembayaran Wisuda (Supabase)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>📊 Setuju dengan Biaya Wisuda?</h1>
+        <p>Silakan berikan suara dan pendapat Anda mengenai biaya wisuda yang telah ditetapkan.</p>
+
+        <div class="vote-summary">
+            <div class="count agree">
+                <h2>SETUJU</h2>
+                <span id="agree-count">0</span>
+            </div>
+            <div class="count disagree">
+                <h2>TIDAK SETUJU</h2>
+                <span id="disagree-count">0</span>
+            </div>
+        </div>
+
+        <div class="vote-actions">
+            <button id="agree-btn" class="btn btn-agree">👍 Saya Setuju</button>
+            <button id="disagree-btn" class="btn btn-disagree">👎 Saya Tidak Setuju</button>
+        </div>
+
+        <hr>
+
+        <h2>Komentar Real-Time</h2>
+        <div class="comment-form">
+            <form id="commentForm">
+                <input type="text" id="name-input" placeholder="Nama Anda" required>
+                <input type="text" id="comment-input" placeholder="Tulis komentar Anda..." required>
+                <div class="vote-choice">
+                    <label><input type="radio" name="vote_choice" value="setuju" checked> Komentar untuk Setuju</label>
+                    <label><input type="radio" name="vote_choice" value="tidak-setuju"> Komentar untuk Tidak Setuju</label>
+                </div>
+                <button type="submit">Kirim Komentar</button>
+            </form>
+        </div>
+
+        <div id="comments-container" class="comment-list">
+            </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
