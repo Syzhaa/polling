@@ -1,12 +1,11 @@
 // =================================================================
 // LANGKAH 1: KONFIGURASI SUPABASE
-// URL dan Kunci API Anda sudah dimasukkan di sini.
+// URL dan Kunci API dari proyek Supabase Anda.
 // =================================================================
 const SUPABASE_URL = 'https://lofsbwhexxzpxqupfxiu.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvZnNid2hleHh6cHhxdXBmeGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4OTQ0NTksImV4cCI6MjA3MjQ3MDQ1OX0.FoF14c8ZYMs-7BbQpTcbJhPzRPAhdBXK_ksMUBWZEP0A';
 
 // Inisialisasi Klien Supabase
-// Kita menggunakan objek 'supabase' global dari script CDN untuk membuat client baru
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
@@ -32,11 +31,6 @@ async function fetchInitialData() {
         .from('votes')
         .select('option, count');
     
-    if (votesError) {
-        console.error('Error fetching votes:', votesError);
-        return;
-    }
-    
     if (votes) {
         votes.forEach(vote => {
             if (vote.option === 'setuju') {
@@ -45,6 +39,8 @@ async function fetchInitialData() {
                 disagreeCountEl.textContent = vote.count;
             }
         });
+    } else if (votesError) {
+        console.error("Error fetching votes:", votesError);
     }
 
     // Ambil data komentar yang sudah ada
@@ -53,14 +49,11 @@ async function fetchInitialData() {
         .select('*')
         .order('created_at', { ascending: false }); // Urutkan dari terbaru
 
-    if (commentsError) {
-        console.error('Error fetching comments:', commentsError);
-        return;
-    }
-
     if (comments) {
         commentsContainer.innerHTML = ''; // Kosongkan dulu
         comments.forEach(comment => displayComment(comment));
+    } else if (commentsError) {
+        console.error("Error fetching comments:", commentsError);
     }
 }
 
@@ -72,13 +65,13 @@ async function fetchInitialData() {
 agreeBtn.addEventListener('click', async () => {
     // Memanggil fungsi 'increment_vote' yang kita buat di SQL Editor
     const { error } = await supabaseClient.rpc('increment_vote', { vote_option: 'setuju' });
-    if (error) console.error('Error incrementing agree vote:', error);
+    if (error) console.error("Error incrementing agree vote:", error);
 });
 
 // Event listener untuk tombol Tidak Setuju
 disagreeBtn.addEventListener('click', async () => {
     const { error } = await supabaseClient.rpc('increment_vote', { vote_option: 'tidak-setuju' });
-    if (error) console.error('Error incrementing disagree vote:', error);
+    if (error) console.error("Error incrementing disagree vote:", error);
 });
 
 // Event listener untuk form komentar
@@ -95,7 +88,7 @@ commentForm.addEventListener('submit', async (e) => {
             .insert([{ name: name, comment_text: comment, vote_option: voteChoice }]);
         
         if (error) {
-            console.error('Error submitting comment:', error);
+            console.error("Error submitting comment:", error);
         } else {
             nameInput.value = '';
             commentInput.value = '';
@@ -134,27 +127,22 @@ function subscribeToChanges() {
     
     // Mendengarkan jika ada PEMBARUAN (UPDATE) di tabel 'votes'
     supabaseClient
-        .from('votes:option=eq.setuju') // Hanya dengarkan perubahan untuk 'setuju'
+        .from('votes')
         .on('UPDATE', payload => {
-            console.log('Agree vote updated!', payload);
-            agreeCountEl.textContent = payload.new.count;
-        })
-        .subscribe();
-        
-    supabaseClient
-        .from('votes:option=eq.tidak-setuju') // Hanya dengarkan perubahan untuk 'tidak-setuju'
-        .on('UPDATE', payload => {
-            console.log('Disagree vote updated!', payload);
-            disagreeCountEl.textContent = payload.new.count;
+            console.log('Vote update received!', payload);
+            const { option, count } = payload.new;
+            if (option === 'setuju') {
+                agreeCountEl.textContent = count;
+            } else if (option === 'tidak-setuju') {
+                disagreeCountEl.textContent = count;
+            }
         })
         .subscribe();
 }
 
 
 // =================================================================
-// LANGKAH 6: JALANKAN SEMUA FUNGSI SAAT HALAMAN SIAP
+// LANGKAH 6: JALANKAN SEMUA FUNGSI
 // =================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    fetchInitialData();
-    subscribeToChanges();
-});
+fetchInitialData();
+subscribeToChanges();
