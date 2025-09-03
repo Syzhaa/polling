@@ -112,32 +112,43 @@ function displayComment(data) {
 
 
 // =================================================================
-// LANGKAH 5: REAL-TIME SUBSCRIPTIONS
+// LANGKAH 5: REAL-TIME SUBSCRIPTIONS (BAGIAN YANG DIPERBARUI TOTAL)
 // =================================================================
-// Fungsi untuk mendengarkan semua perubahan data
 function subscribeToChanges() {
-    // Mendengarkan jika ada komentar BARU (INSERT) di tabel 'comments'
-    supabaseClient
-        .from('comments')
-        .on('INSERT', payload => {
-            console.log('New comment received!', payload);
-            displayComment(payload.new);
-        })
-        .subscribe();
-    
-    // Mendengarkan jika ada PEMBARUAN (UPDATE) di tabel 'votes'
-    supabaseClient
-        .from('votes')
-        .on('UPDATE', payload => {
-            console.log('Vote update received!', payload);
-            const { option, count } = payload.new;
-            if (option === 'setuju') {
-                agreeCountEl.textContent = count;
-            } else if (option === 'tidak-setuju') {
-                disagreeCountEl.textContent = count;
+    // Membuat satu 'channel' untuk mendengarkan semua perubahan
+    const channel = supabaseClient.channel('public-db-changes');
+
+    channel
+        .on(
+            'postgres_changes', 
+            { event: 'INSERT', schema: 'public', table: 'comments' }, 
+            (payload) => {
+                console.log('New comment received!', payload);
+                // Ketika ada komentar baru, panggil fungsi displayComment
+                displayComment(payload.new);
             }
-        })
-        .subscribe();
+        )
+        .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'votes' },
+            (payload) => {
+                console.log('Vote update received!', payload);
+                // Ketika ada update di tabel votes, perbarui tampilan
+                const { option, count } = payload.new;
+                if (option === 'setuju') {
+                    agreeCountEl.textContent = count;
+                } else if (option === 'tidak-setuju') {
+                    disagreeCountEl.textContent = count;
+                }
+            }
+        )
+        .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                console.log('✅ Realtime status: SUBSCRIBED');
+            } else {
+                console.log('🔴 Realtime status:', status);
+            }
+        });
 }
 
 
