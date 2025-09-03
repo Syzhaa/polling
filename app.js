@@ -23,7 +23,6 @@ const replyContextBar = document.getElementById('reply-context-bar');
 const replyToNameEl = document.getElementById('reply-to-name');
 const replyToTextEl = document.getElementById('reply-to-text');
 const cancelReplyBtn = document.getElementById('cancel-reply-btn');
-// Elemen baru untuk toggle chart
 const chartCard = document.getElementById('chart-card');
 const toggleChartBtn = document.getElementById('toggle-chart-btn');
 
@@ -65,7 +64,7 @@ function checkUser() {
 
 function initializeChart() {
     voteChart = new Chart(chartCanvas, {
-        type: 'doughnut', // Diubah ke doughnut agar lebih modern
+        type: 'doughnut',
         data: {
             labels: ['Setuju', 'Tidak Setuju'],
             datasets: [{ data: [0, 0], backgroundColor: ['#25D366', '#FF5A5F'], borderWidth: 0 }]
@@ -196,7 +195,6 @@ chatScreen.addEventListener('click', (e) => {
     }
 });
 
-// PERUBAHAN 3: Event listener untuk tombol toggle chart
 toggleChartBtn.addEventListener('click', () => {
     chartCard.classList.toggle('is-collapsed');
     const icon = toggleChartBtn.querySelector('.material-symbols-outlined');

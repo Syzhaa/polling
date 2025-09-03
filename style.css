@@ -54,10 +54,8 @@ body {
     border-radius: 4px; cursor: pointer; font-weight: bold;
 }
 
-/* PERUBAHAN UTAMA: Menggunakan CSS Grid */
 .app-container {
     display: grid;
-    /* Definisikan baris: header, chart, area chat (mengisi sisa), footer */
     grid-template-rows: auto auto 1fr auto; 
     height: 100%; 
     width: 100%;
@@ -252,4 +250,19 @@ body {
 .cancel-reply {
     background: none; border: none; font-size: 1.5rem;
     color: var(--light-text); cursor: pointer; padding: 0 5px;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .chart-container-small {
+        display: none;
+    }
+    .app-header {
+        padding: 10px 15px;
+    }
+    .app-header h1 {
+        font-size: 1.1rem;
+    }
+    .chat-input-bar {
+        padding: 5px 8px;
+    }
 }
