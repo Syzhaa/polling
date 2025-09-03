@@ -1,71 +1,74 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voting Wisuda</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voting Wisuda</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
 
-    <div id="name-registration-screen" class="registration-container">
-        <div class="card">
-            <h2>Selamat Datang</h2>
-            <p>Silakan masukkan nama Anda untuk berpartisipasi dalam voting.</p>
-            <form id="name-form">
-                <input type="text" id="name-input-reg" placeholder="Nama Lengkap Anda" required>
-                <button type="submit">Masuk</button>
-            </form>
-        </div>
+  <!-- Screen registrasi nama -->
+  <div id="name-registration-screen" class="registration-container">
+    <div class="card">
+      <h2>Selamat Datang</h2>
+      <p>Silakan masukkan nama Anda untuk berpartisipasi dalam voting.</p>
+      <form id="name-form">
+        <input type="text" id="name-input-reg" placeholder="Nama Lengkap Anda" required />
+        <button type="submit">Masuk</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- App utama -->
+  <div id="main-app" class="app-container" style="display:none;">
+    <header class="app-header">
+      <h1>Voting Wisuda</h1>
+    </header>
+
+    <div id="chart-card" class="card chart-container-small">
+      <div class="card-header">
+        <h2>Hasil Voting</h2>
+        <button id="toggle-chart-btn" class="toggle-btn">
+          <span class="material-symbols-outlined">expand_less</span>
+        </button>
+      </div>
+      <div id="chart-wrapper" class="chart-wrapper">
+        <canvas id="voteChart"></canvas>
+      </div>
     </div>
 
-    <div id="main-app" class="app-container" style="display: none;">
-        <header class="app-header">
-            <h1>Voting Wisuda</h1>
-        </header>
+    <main id="chat-screen" class="chat-screen"></main>
 
-        <div id="chart-card" class="card chart-container-small">
-            <div class="card-header">
-                <h2>Hasil Voting</h2>
-                <button id="toggle-chart-btn" class="toggle-btn">
-                    <span class="material-symbols-outlined">expand_less</span>
-                </button>
-            </div>
-            <div id="chart-wrapper" class="chart-wrapper">
-                <canvas id="voteChart"></canvas>
-            </div>
+    <footer class="chat-footer">
+      <div id="reply-context-bar" class="reply-context" style="display:none;">
+        <div class="reply-content">
+          <div id="reply-to-name" class="reply-name"></div>
+          <div id="reply-to-text" class="reply-text"></div>
+        </div>
+        <button id="cancel-reply-btn" class="cancel-reply" aria-label="Batal balas">&times;</button>
+      </div>
+
+      <div class="chat-input-bar">
+        <div class="vote-buttons">
+          <button id="agree-btn" class="vote-btn agree" aria-label="Setuju">👍</button>
+          <button id="disagree-btn" class="vote-btn disagree" aria-label="Tidak setuju">👎</button>
         </div>
 
-        <main id="chat-screen" class="chat-screen">
-            </main>
+        <form id="comment-form" class="comment-form">
+          <!-- DIGANTI: input -> textarea -->
+          <textarea id="comment-input" placeholder="Ketik komentar..." rows="1" autocomplete="off" enterkeyhint="newline"></textarea>
+          <button type="submit" class="send-btn" aria-label="Kirim">
+            <span class="material-symbols-outlined">send</span>
+          </button>
+        </form>
+      </div>
+    </footer>
+  </div>
 
-        <footer class="chat-footer">
-            <div id="reply-context-bar" class="reply-context" style="display: none;">
-                <div class="reply-content">
-                    <div id="reply-to-name" class="reply-name"></div>
-                    <div id="reply-to-text" class="reply-text"></div>
-                </div>
-                <button id="cancel-reply-btn" class="cancel-reply">&times;</button>
-            </div>
-            
-            <div class="chat-input-bar">
-                <div class="vote-buttons">
-                    <button id="agree-btn" class="vote-btn agree">👍</button>
-                    <button id="disagree-btn" class="vote-btn disagree">👎</button>
-                </div>
-                <form id="comment-form" class="comment-form">
-                    <input type="text" id="comment-input" placeholder="Ketik komentar..." autocomplete="off">
-                    <button type="submit" class="send-btn">
-                        <span class="material-symbols-outlined">send</span>
-                    </button>
-                </form>
-            </div>
-        </footer>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
