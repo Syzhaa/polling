@@ -15,12 +15,11 @@
 
 * { box-sizing: border-box; }
 
-/* PERUBAHAN 1: Pastikan html dan body mengisi seluruh tinggi layar */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Mencegah scroll di body */
+    overflow: hidden;
 }
 
 body {
@@ -36,12 +35,11 @@ body {
     box-shadow: var(--shadow);
 }
 
-/* Registration Screen */
 .registration-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%; /* Menggunakan 100% bukan 100vh */
+    height: 100%;
     padding: 20px;
 }
 .registration-container form {
@@ -57,11 +55,9 @@ body {
     border-radius: 4px; cursor: pointer; font-weight: bold;
 }
 
-/* Main App Container */
 .app-container {
     display: flex;
     flex-direction: column;
-    /* PERUBAHAN 2: Menggunakan 100% agar fleksibel saat keyboard muncul */
     height: 100%; 
     width: 100%;
     max-width: 600px;
@@ -76,19 +72,70 @@ body {
     text-align: center;
     box-shadow: var(--shadow);
     z-index: 10;
-    flex-shrink: 0; /* Mencegah header menyusut */
+    flex-shrink: 0;
+}
+.app-header h1 {
+    margin: 0;
+    font-size: 1.2rem;
 }
 
+/* PERUBAHAN 1: Style untuk Kartu Diagram & Tombol Toggle */
 .chart-container-small {
-    padding: 10px;
+    padding: 10px 20px;
     margin: 10px;
-    height: 180px;
     border-radius: 8px;
-    flex-shrink: 0; /* Mencegah chart menyusut */
+    flex-shrink: 0;
+    transition: padding 0.3s ease;
 }
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.card-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+.toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.toggle-btn:hover {
+    background-color: #f0f0f0;
+}
+.toggle-btn span {
+    transition: transform 0.3s ease;
+}
+.chart-wrapper {
+    height: 150px;
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+/* Style saat diciutkan */
+.is-collapsed .chart-wrapper {
+    height: 0;
+}
+.is-collapsed .toggle-btn span {
+    transform: rotate(180deg);
+}
+.is-collapsed.chart-container-small {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.is-collapsed .card-header {
+    margin-bottom: 0;
+}
+
 
 .chat-screen {
-    flex-grow: 1; /* Biarkan area chat mengisi sisa ruang */
+    flex-grow: 1;
     overflow-y: auto;
     padding: 10px;
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
@@ -96,7 +143,6 @@ body {
     flex-direction: column;
 }
 
-/* Chat Bubbles */
 .chat-bubble {
     padding: 8px 12px;
     border-radius: 8px;
@@ -155,11 +201,10 @@ body {
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* Footer, Input Bar, & Reply Context */
 .chat-footer {
     background: #F0F0F0;
     box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-    flex-shrink: 0; /* Mencegah footer menyusut */
+    flex-shrink: 0;
 }
 .chat-input-bar {
     display: flex;
@@ -188,16 +233,21 @@ body {
     border-radius: 20px;
     padding: 0 5px;
 }
+
+/* PERUBAHAN 2: Memperbaiki masalah form komentar melebar */
 .comment-form input {
-    flex-grow: 1; border: none; padding: 10px;
-    background: transparent; outline: none;
+    flex-grow: 1;
+    border: none;
+    padding: 10px;
+    background: transparent;
+    outline: none;
+    min-width: 0; /* <-- INI KUNCINYA! */
 }
 .comment-form .send-btn {
     background: none; border: none; color: #075E54;
     cursor: pointer; font-size: 1.5rem; padding: 5px;
 }
 
-/* Reply Context Bar */
 .reply-context {
     display: flex; align-items: center; padding: 8px 12px;
     background: #E8E8E8; border-left: 4px solid var(--agree-color);

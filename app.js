@@ -23,6 +23,9 @@ const replyContextBar = document.getElementById('reply-context-bar');
 const replyToNameEl = document.getElementById('reply-to-name');
 const replyToTextEl = document.getElementById('reply-to-text');
 const cancelReplyBtn = document.getElementById('cancel-reply-btn');
+// Elemen baru untuk toggle chart
+const chartCard = document.getElementById('chart-card');
+const toggleChartBtn = document.getElementById('toggle-chart-btn');
 
 // =================================================================
 // STATE APLIKASI
@@ -36,12 +39,9 @@ let replyContext = null;
 // =================================================================
 
 function disableVotingButtons() {
-    agreeBtn.disabled = true;
-    disagreeBtn.disabled = true;
-    agreeBtn.style.cursor = 'not-allowed';
-    disagreeBtn.style.cursor = 'not-allowed';
-    agreeBtn.style.opacity = '0.5';
-    disagreeBtn.style.opacity = '0.5';
+    agreeBtn.disabled = true; disagreeBtn.disabled = true;
+    agreeBtn.style.cursor = 'not-allowed'; disagreeBtn.style.cursor = 'not-allowed';
+    agreeBtn.style.opacity = '0.5'; disagreeBtn.style.opacity = '0.5';
 }
 
 function checkUser() {
@@ -55,7 +55,6 @@ function checkUser() {
         if (hasVoted) {
             disableVotingButtons();
         }
-
         fetchInitialData();
         subscribeToChanges();
     } else {
@@ -66,12 +65,12 @@ function checkUser() {
 
 function initializeChart() {
     voteChart = new Chart(chartCanvas, {
-        type: 'pie',
+        type: 'doughnut', // Diubah ke doughnut agar lebih modern
         data: {
             labels: ['Setuju', 'Tidak Setuju'],
             datasets: [{ data: [0, 0], backgroundColor: ['#25D366', '#FF5A5F'], borderWidth: 0 }]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom' } }, cutout: '60%' }
     });
 }
 
@@ -87,7 +86,6 @@ function scrollToBottom() {
     chatScreen.scrollTop = chatScreen.scrollHeight;
 }
 
-// **INI PERUBAHAN UTAMA**: Logika untuk menampilkan bubble chat
 function displayMessage(data) {
     const bubble = document.createElement('div');
     bubble.classList.add('chat-bubble');
@@ -104,29 +102,18 @@ function displayMessage(data) {
             </div>
         `;
     }
-
     if (data.vote_option === 'komentar') {
-        // Cek apakah pesan ini dari pengguna saat ini atau orang lain
         if (data.name === currentUser) {
-            bubble.classList.add('sent'); // Pesan Anda
-            bubble.innerHTML = `
-                ${replyHTML}
-                <div class="text">${data.comment_text}</div>
-            `;
+            bubble.classList.add('sent');
+            bubble.innerHTML = `${replyHTML}<div class="text">${data.comment_text}</div>`;
         } else {
-            bubble.classList.add('received'); // Pesan orang lain
-            bubble.innerHTML = `
-                ${replyHTML}
-                <div class="name">${data.name}</div>
-                <div class="text">${data.comment_text}</div>
-            `;
+            bubble.classList.add('received');
+            bubble.innerHTML = `${replyHTML}<div class="name">${data.name}</div><div class="text">${data.comment_text}</div>`;
         }
     } else {
-        // Ini untuk notifikasi voting sistem
         bubble.classList.add('system');
         bubble.innerHTML = `<strong>${data.name}</strong> ${data.comment_text}`;
     }
-    
     chatScreen.appendChild(bubble);
 }
 
@@ -137,7 +124,6 @@ async function fetchInitialData() {
         const disagree = votes.find(v => v.option === 'tidak-setuju')?.count || 0;
         updateChart(agree, disagree);
     }
-
     const { data: comments } = await supabaseClient.from('comments').select('*').order('created_at', { ascending: true });
     if (comments) {
         chatScreen.innerHTML = '';
@@ -148,8 +134,7 @@ async function fetchInitialData() {
 
 async function handleVote(voteChoice, message) {
     if (localStorage.getItem('userHasVoted')) {
-        alert('Anda sudah memberikan suara.');
-        return;
+        alert('Anda sudah memberikan suara.'); return;
     }
     disableVotingButtons();
     localStorage.setItem('userHasVoted', 'true');
@@ -177,8 +162,7 @@ nameForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = nameInputReg.value.trim();
     if (name) {
-        localStorage.setItem('votingAppName', name);
-        checkUser();
+        localStorage.setItem('votingAppName', name); checkUser();
     }
 });
 
@@ -187,17 +171,13 @@ commentForm.addEventListener('submit', async (e) => {
     const comment = commentInput.value.trim();
     if (comment) {
         const messageData = {
-            name: currentUser,
-            comment_text: comment,
-            vote_option: 'komentar'
+            name: currentUser, comment_text: comment, vote_option: 'komentar'
         };
-
         if (replyContext) {
             messageData.reply_to_id = replyContext.id;
             messageData.reply_to_name = replyContext.name;
             messageData.reply_to_text = replyContext.text;
         }
-
         await supabaseClient.from('comments').insert([messageData]);
         commentInput.value = '';
         cancelReply();
@@ -209,14 +189,21 @@ disagreeBtn.addEventListener('click', () => handleVote('tidak-setuju', 'memilih 
 cancelReplyBtn.addEventListener('click', cancelReply);
 
 chatScreen.addEventListener('click', (e) => {
-    const bubble = e.target.closest('.chat-bubble:not(.system)'); // System message can't be replied to
+    const bubble = e.target.closest('.chat-bubble:not(.system)');
     if (bubble) {
-        replyContext = {
-            id: bubble.dataset.id,
-            name: bubble.dataset.name,
-            text: bubble.dataset.text,
-        };
+        replyContext = { id: bubble.dataset.id, name: bubble.dataset.name, text: bubble.dataset.text };
         showReplyUI(replyContext);
+    }
+});
+
+// PERUBAHAN 3: Event listener untuk tombol toggle chart
+toggleChartBtn.addEventListener('click', () => {
+    chartCard.classList.toggle('is-collapsed');
+    const icon = toggleChartBtn.querySelector('.material-symbols-outlined');
+    if (chartCard.classList.contains('is-collapsed')) {
+        icon.textContent = 'expand_more';
+    } else {
+        icon.textContent = 'expand_less';
     }
 });
 

@@ -25,8 +25,16 @@
             <h1>Voting Wisuda</h1>
         </header>
 
-        <div class="chart-container-small card">
-            <canvas id="voteChart"></canvas>
+        <div id="chart-card" class="card chart-container-small">
+            <div class="card-header">
+                <h2>Hasil Voting</h2>
+                <button id="toggle-chart-btn" class="toggle-btn">
+                    <span class="material-symbols-outlined">expand_less</span>
+                </button>
+            </div>
+            <div id="chart-wrapper" class="chart-wrapper">
+                <canvas id="voteChart"></canvas>
+            </div>
         </div>
 
         <main id="chat-screen" class="chat-screen">
