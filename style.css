@@ -1,269 +1,227 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-:root {
-    --sent-bg: #DCF8C6;
-    --received-bg: #FFFFFF;
-    --agree-color: #25D366;
-    --disagree-color: #FF5A5F;
-    --system-color: #E5A937;
-    --bg-color: #E5DDD5;
-    --text-color: #333;
-    --light-text: #666;
-    --reply-bg: rgba(0, 0, 0, 0.05);
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* ================== Variabel & Reset Ringan ================== */
+:root{
+  --sent-bg:#DCF8C6;
+  --received-bg:#FFFFFF;
+  --agree-color:#25D366;
+  --disagree-color:#FF5A5F;
+  --system-color:#E5A937;
+  --bg-color:#E5DDD5;
+  --text-color:#333;
+  --light-text:#666;
+  --reply-bg:rgba(0,0,0,.05);
+  --shadow:0 2px 4px rgba(0,0,0,.1);
+
+  /* fallback yang diperlukan */
+  --app-bg:#E5DDD5;
+  --card-bg:#fff;
 }
 
-* { 
-    box-sizing: border-box; 
+*{box-sizing:border-box;}
+img,svg,canvas,video{max-width:100%;height:auto}
+button{font:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ================== Halaman Terkunci 1 Layar ================== */
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;                 /* halaman tidak scroll */
+  font-family:'Roboto',sans-serif;
+  color:var(--text-color);
+  background:var(--bg-color);
 }
 
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden; /* Mencegah seluruh halaman bisa di-scroll */
-    font-family: 'Roboto', sans-serif;
+/* ================== Kontainer Utama ================== */
+.app-container{
+  display:flex;
+  flex-direction:column;
+  height:100dvh;                   /* kunci tinggi viewport mobile */
+  max-width:600px;
+  margin:0 auto;
+  background:var(--app-bg);
 }
 
-/* ======================================================= */
-/* Kunci Utama Layout: Menggunakan Flexbox secara Tegas    */
-/* ======================================================= */
-.app-container {
-    display: flex;
-    flex-direction: column; /* MEMAKSA SEMUA ELEMEN TERSUSUN KE BAWAH */
-    height: 100%; 
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    background: var(--app-bg);
+/* header / chart / footer tidak menyusut */
+.app-header,
+.chart-container-small,
+.chat-footer{flex-shrink:0}
+
+/* ================== Header ================== */
+.app-header{
+  min-height:56px;
+  background:#075E54;
+  color:#fff;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:var(--shadow);
+  z-index:10;
+}
+.app-header h1{
+  margin:0;
+  font-size:1.05rem;
+  letter-spacing:.2px;
 }
 
-.app-header, 
-.chart-container-small, 
-.chat-footer {
-    flex-shrink: 0; /* Bagian atas dan bawah tidak boleh menyusut */
+/* ================== Kartu/Chart ================== */
+.card{background:var(--card-bg);padding:20px;border-radius:10px;box-shadow:var(--shadow)}
+.chart-container-small{
+  background:var(--card-bg);
+  box-shadow:var(--shadow);
+  padding:8px 12px;
+  margin:8px 12px;
+  border-radius:10px;
+}
+.card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+.card-header h2{margin:0;font-size:.98rem}
+.toggle-btn{
+  background:none;border:0;cursor:pointer;padding:6px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.toggle-btn span{display:inline-block;transition:transform .3s ease}
+.chart-wrapper{height:140px;overflow:hidden;transition:height .3s ease}
+.is-collapsed .chart-wrapper{height:0}
+.is-collapsed .toggle-btn span{transform:rotate(180deg)}
+.is-collapsed.chart-container-small{padding-top:8px;padding-bottom:8px}
+.is-collapsed .card-header{margin-bottom:0}
+
+/* ================== Area Chat (satu-satunya yang scroll) ================== */
+.chat-screen{
+  flex-grow:1;
+  min-height:0;                    /* penting agar scroll bekerja */
+  overflow-y:auto;                 /* hanya area ini yang scroll */
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:10px;
+  background-image:url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+  scroll-behavior:smooth;
 }
 
-.chat-screen {
-    flex-grow: 1; /* Area chat MENGISI SEMUA SISA RUANG */
-    min-height: 0; /* Trik penting agar scroll berfungsi di flexbox */
-    overflow-y: auto; /* HANYA area ini yang bisa di-scroll */
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-    scroll-behavior: smooth;
+/* gelembung chat */
+.chat-bubble{
+  padding:8px 12px;
+  border-radius:10px;
+  max-width:80%;
+  word-wrap:break-word;
+  box-shadow:0 1px 1px rgba(0,0,0,.08);
+  cursor:pointer;
 }
-/* ======================================================= */
+.chat-bubble .name{
+  font-weight:700;
+  font-size:.78rem;
+  margin-bottom:4px;
+  color:#075E54;
+}
+.chat-bubble .text{font-size:.95rem;line-height:1.35}
 
-.card {
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
+.chat-bubble.sent{
+  background:var(--sent-bg);
+  align-self:flex-end;
+  border-bottom-right-radius:4px;
 }
-
-.registration-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    padding: 20px;
+.chat-bubble.received{
+  background:var(--received-bg);
+  align-self:flex-start;
+  border-bottom-left-radius:4px;
 }
-.registration-container form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.registration-container input {
-    padding: 10px; border: 1px solid #ccc; border-radius: 4px;
-}
-.registration-container button {
-    padding: 10px; background: var(--agree-color); color: white; border: none;
-    border-radius: 4px; cursor: pointer; font-weight: bold;
+.chat-bubble.system{
+  background:#FFF3C2;
+  align-self:center;
+  text-align:center;
+  font-size:.82rem;
+  font-style:italic;
+  color:var(--system-color);
+  cursor:default;
 }
 
-.app-header {
-    background: #075E54;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    box-shadow: var(--shadow);
-    z-index: 10;
+/* blok balasan (reply preview di dalam bubble) */
+.reply-block{
+  background:var(--reply-bg);
+  border-left:3px solid var(--agree-color);
+  padding:5px 8px;
+  margin:0 0 6px 0;
+  border-radius:6px;
 }
-.app-header h1 {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-.chart-container-small {
-    padding: 10px 20px;
-    margin: 10px;
-    border-radius: 8px;
-    transition: padding 0.3s ease;
-}
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-.card-header h2 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-.toggle-btn {
-    background: none; border: none; cursor: pointer; padding: 5px;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-}
-.toggle-btn:hover {
-    background-color: #f0f0f0;
-}
-.toggle-btn span {
-    transition: transform 0.3s ease;
-}
-.chart-wrapper {
-    height: 150px;
-    overflow: hidden;
-    transition: height 0.3s ease;
-}
-.is-collapsed .chart-wrapper {
-    height: 0;
-}
-.is-collapsed .toggle-btn span {
-    transform: rotate(180deg);
-}
-.is-collapsed.chart-container-small {
-    padding-top: 10px; padding-bottom: 10px;
-}
-.is-collapsed .card-header {
-    margin-bottom: 0;
+.reply-block .name{font-weight:700;font-size:.78rem;color:var(--agree-color)}
+.reply-block .text{
+  font-size:.85rem;color:var(--light-text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
-.chat-bubble {
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    max-width: 80%;
-    word-wrap: break-word;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-    cursor: pointer;
-    transition: background-color 0.2s;
+/* ================== Footer / Input ================== */
+.chat-footer{background:#F0F0F0;box-shadow:0 -2px 5px rgba(0,0,0,.05)}
+.chat-input-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px;
+  background:#F0F0F0;
+  border-top:1px solid #ddd;
 }
-.chat-bubble:not(.system):hover {
-    filter: brightness(0.95);
+.vote-buttons{display:flex;gap:6px}
+.vote-btn{
+  border:0;border-radius:50%;
+  width:40px;height:40px;
+  font-size:1.2rem;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
 }
-.chat-bubble .name {
-    font-weight: bold;
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-    color: #075E54;
+.vote-btn.agree{background:var(--agree-color);color:#fff}
+.vote-btn.disagree{background:var(--disagree-color);color:#fff}
+
+.comment-form{
+  flex:1;
+  display:flex;
+  background:#fff;
+  border-radius:20px;
+  padding:0 6px;
 }
-.chat-bubble .text {
-    font-size: 0.95rem;
+.comment-form input{
+  flex:1;border:0;padding:10px;background:transparent;outline:none;min-width:0;
+}
+.comment-form .send-btn{
+  background:none;border:0;color:#075E54;cursor:pointer;font-size:1.5rem;padding:6px;
 }
 
-.chat-bubble.sent {
-    background: var(--sent-bg);
-    align-self: flex-end;
-    border-bottom-right-radius: 0;
+/* balasan singkat di atas input (opsional) */
+.reply-context{
+  display:flex;align-items:center;
+  padding:8px 12px;
+  background:#E8E8E8;
+  border-left:4px solid var(--agree-color);
 }
-.chat-bubble.received {
-    background: var(--received-bg);
-    align-self: flex-start;
-    border-bottom-left-radius: 0;
+.reply-content{flex:1;overflow:hidden}
+.reply-name{font-weight:700;font-size:.85rem;color:var(--agree-color)}
+.reply-text{
+  font-size:.9rem;color:var(--light-text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.chat-bubble.system {
-    background: #FFF3C2;
-    align-self: center;
-    text-align: center;
-    font-size: 0.8rem;
-    font-style: italic;
-    color: var(--system-color);
-    cursor: default;
+.cancel-reply{
+  background:none;border:0;font-size:1.5rem;color:var(--light-text);
+  cursor:pointer;padding:0 5px;
 }
 
-.reply-block {
-    background: var(--reply-bg);
-    border-left: 3px solid var(--agree-color);
-    padding: 5px 8px;
-    margin: -3px 0 5px 0;
-    border-radius: 4px;
-}
-.reply-block .name {
-    font-weight: bold; font-size: 0.8rem; color: var(--agree-color);
-}
-.reply-block .text {
-    font-size: 0.85rem; color: var(--light-text);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+/* ================== Responsif ================== */
+/* Landscape: sembunyikan chart agar tetap lega */
+@media (orientation: landscape){
+  .chart-container-small{display:none}
 }
 
-.chat-footer {
-    background: #F0F0F0;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-}
-.chat-input-bar {
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    background: #F0F0F0;
-    border-top: 1px solid #ddd;
-}
-.vote-buttons {
-    display: flex;
-    gap: 5px;
-}
-.vote-btn {
-    border: none; border-radius: 50%; width: 40px; height: 40px;
-    font-size: 1.2rem; cursor: pointer; display: flex;
-    justify-content: center; align-items: center;
-}
-.vote-btn.agree { background: var(--agree-color); color: white; }
-.vote-btn.disagree { background: var(--disagree-color); color: white; }
-
-.comment-form {
-    flex-grow: 1;
-    display: flex;
-    margin-left: 8px;
-    background: white;
-    border-radius: 20px;
-    padding: 0 5px;
-}
-.comment-form input {
-    flex-grow: 1;
-    border: none;
-    padding: 10px;
-    background: transparent;
-    outline: none;
-    min-width: 0;
-}
-.comment-form .send-btn {
-    background: none; border: none; color: #075E54;
-    cursor: pointer; font-size: 1.5rem; padding: 5px;
-}
-
-.reply-context {
-    display: flex; align-items: center; padding: 8px 12px;
-    background: #E8E8E8; border-left: 4px solid var(--agree-color);
-}
-.reply-content {
-    flex-grow: 1; overflow: hidden;
-}
-.reply-name {
-    font-weight: bold; font-size: 0.85rem; color: var(--agree-color);
-}
-.reply-text {
-    font-size: 0.9rem; color: var(--light-text);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.cancel-reply {
-    background: none; border: none; font-size: 1.5rem;
-    color: var(--light-text); cursor: pointer; padding: 0 5px;
-}
-
-/* Aturan landscape yang disederhanakan */
-@media (orientation: landscape) {
-    .chart-container-small {
-        display: none;
-    }
+/* Device ekstra kecil */
+@media (max-width:360px){
+  .app-header{min-height:52px;padding:10px 12px}
+  .app-header h1{font-size:1rem}
+  .chart-wrapper{height:120px}
+  .chat-screen{padding:8px}
+  .vote-btn{width:36px;height:36px;font-size:1.1rem}
 }
